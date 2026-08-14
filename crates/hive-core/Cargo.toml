@@ -19,7 +19,7 @@ tracing.workspace = true
 uuid.workspace = true
 
 reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
-rusqlite = { version = "0.37", features = ["bundled", "chrono"] }
+rusqlite = { version = "0.40", features = ["bundled", "chrono"] }
 toml = "0.9"
 
 [dev-dependencies]

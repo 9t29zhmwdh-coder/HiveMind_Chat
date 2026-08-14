@@ -35,6 +35,16 @@ is a commitment to a date.
 - **Desktop build.** A Tauri wrapper around the same core, for people who do
   not want to run a server at all.
 
+## Known limitations
+
+Documented rather than silently accepted; the reasoning is in
+[docs/threat-model.md](docs/threat-model.md).
+
+- The server speaks plain HTTP and expects loopback or a reverse proxy for TLS.
+- One shared access token, so the audit log records an address rather than an
+  identity.
+- Transcripts are stored in the clear; file permissions are the protection.
+
 ## Deliberately out of scope
 
 - **User accounts and roles.** A shared access token fits a personal or

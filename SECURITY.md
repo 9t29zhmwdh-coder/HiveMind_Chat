@@ -33,6 +33,20 @@ This is the part of the design most worth reviewing.
 - There are no user accounts. The access token is a single shared secret, appropriate for a personal or small-team instance and not for a multi-tenant deployment.
 - CORS is same-origin unless `allowed_origins` names other origins, because the server ships the UI it serves.
 
+## Audit Logging
+
+Every operation that writes or removes stored data (creating, updating,
+duplicating or deleting a room, and clearing a transcript) emits a structured
+entry under the `hivemind::audit` target with the operation, the room and the
+caller's address. There are no user accounts, so the address is the strongest
+identity available; behind a reverse proxy it is the proxy's.
+
+## Threat Model
+
+[docs/threat-model.md](docs/threat-model.md) contains the STRIDE analysis,
+the trust boundaries, and the limitations that are knowingly accepted for this
+release.
+
 ## Input Handling
 
 - Prompts are capped at 32,000 characters and request bodies at 256 KB.
@@ -47,7 +61,7 @@ This is the part of the design most worth reviewing.
 - `cargo audit --deny warnings` and `npm audit --audit-level=high` run in CI on every pull request.
 - Dependabot watches the Cargo, npm, GitHub Actions and Docker ecosystems, which keeps the action pins from rotting.
 - CodeQL runs as a workflow rather than through the repository's default setup, because the default setup never runs on Dependabot pull requests.
-- Release archives carry a build provenance attestation and a SHA-256 checksum.
+- Release archives carry a build provenance attestation, a SHA-256 checksum, and CycloneDX SBOMs for both the Rust and the npm dependency trees.
 
 ## Container Hardening
 

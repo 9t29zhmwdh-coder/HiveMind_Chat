@@ -1,0 +1,51 @@
+# HiveMind Chat configuration.
+#
+# Copy to hivemind.toml and adjust. This file is safe to commit: it holds the
+# NAMES of the environment variables that carry the credentials, never the
+# credentials themselves.
+
+[server]
+# Loopback by default. Bind to 0.0.0.0 only together with HIVEMIND_ACCESS_TOKEN.
+bind = "127.0.0.1:8750"
+database = "hivemind.db"
+# Extra browser origins allowed to call the API. Empty means same-origin only,
+# which is what you want when this server also serves the web UI.
+allowed_origins = []
+
+# Local models. No credential involved, nothing leaves the machine.
+[[providers]]
+id = "local"
+label = "Ollama"
+kind = "ollama"
+base_url = "http://127.0.0.1:11434"
+
+# Anthropic. `api_key_env` names the variable holding the key.
+# [[providers]]
+# id = "anthropic-main"
+# label = "Anthropic"
+# kind = "anthropic"
+# api_key_env = "HIVEMIND_KEY_ANTHROPIC"
+
+# Any endpoint speaking the OpenAI chat completions dialect: OpenAI itself,
+# Groq, Together, vLLM, llama.cpp or LM Studio. Add one entry per account, and
+# give each its own environment variable so accounts stay separable.
+# [[providers]]
+# id = "openai"
+# label = "OpenAI"
+# kind = "openai"
+# base_url = "https://api.openai.com/v1"
+# api_key_env = "HIVEMIND_KEY_OPENAI"
+
+# [[providers]]
+# id = "groq"
+# label = "Groq"
+# kind = "openai"
+# base_url = "https://api.groq.com/openai/v1"
+# api_key_env = "HIVEMIND_KEY_GROQ"
+
+# A second local server, no credential needed.
+# [[providers]]
+# id = "lmstudio"
+# label = "LM Studio"
+# kind = "openai"
+# base_url = "http://127.0.0.1:1234/v1"

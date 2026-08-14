@@ -1,0 +1,25 @@
+# Rust
+/target
+**/*.rs.bk
+
+# Node
+node_modules/
+frontend/dist/
+.vite/
+
+# Local runtime state
+*.db
+*.db-shm
+*.db-wal
+/data/
+
+# Secrets: never commit real credentials
+.env
+.env.*
+!.env.example
+
+# Editor and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp

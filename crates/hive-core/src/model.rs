@@ -274,6 +274,13 @@ pub struct Room {
     /// Required by `TurnPolicy::Moderated`, ignored otherwise.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub moderator_id: Option<String>,
+    /// How many of the most recent messages each agent is shown.
+    ///
+    /// The transcript keeps growing, but a model's context window does not, so
+    /// a long-running room would eventually send a prompt no model can accept.
+    /// `0` means no limit, for short rooms where the whole history matters.
+    #[serde(default = "default_context_limit")]
+    pub context_limit: u32,
     #[serde(default)]
     pub agents: Vec<Agent>,
     pub created_at: DateTime<Utc>,
@@ -281,6 +288,12 @@ pub struct Room {
 
 fn default_rounds() -> u32 {
     1
+}
+
+/// Enough for a long conversation, small enough to stay inside the context
+/// window of the local models this tool is usually pointed at.
+fn default_context_limit() -> u32 {
+    40
 }
 
 impl Room {
@@ -292,6 +305,7 @@ impl Room {
             policy,
             rounds: 1,
             moderator_id: None,
+            context_limit: default_context_limit(),
             agents: Vec::new(),
             created_at: Utc::now(),
         }
@@ -305,6 +319,7 @@ impl Room {
         let mut copy = Self::new(name, self.policy);
         copy.topic = self.topic.clone();
         copy.rounds = self.rounds;
+        copy.context_limit = self.context_limit;
         copy.agents = self
             .agents
             .iter()
@@ -352,6 +367,11 @@ impl Room {
                 "rounds must be between 1 and 20".into(),
             ));
         }
+        if self.context_limit > 1_000 {
+            return Err(HiveError::Validation(
+                "the context limit must be 1000 messages or fewer, or 0 for no limit".into(),
+            ));
+        }
         for agent in &self.agents {
             agent.validate()?;
         }
@@ -368,6 +388,20 @@ impl Room {
                 "the moderated policy requires a moderator agent".into(),
             )),
         }
+    }
+}
+
+impl Room {
+    /// The slice of a transcript that agents in this room are shown.
+    ///
+    /// Always the most recent messages, so the current question and the turns
+    /// of the round in progress are never the ones dropped.
+    pub fn context_window<'a>(&self, transcript: &'a [Message]) -> &'a [Message] {
+        let limit = self.context_limit as usize;
+        if limit == 0 || transcript.len() <= limit {
+            return transcript;
+        }
+        &transcript[transcript.len() - limit..]
     }
 }
 
@@ -439,6 +473,45 @@ mod tests {
         assert!(validate_prompt("   ").is_err());
         assert!(validate_prompt(&"a".repeat(MAX_PROMPT_CHARS + 1)).is_err());
         assert!(validate_prompt("Compare both approaches.").is_ok());
+    }
+
+    #[test]
+    fn the_context_window_keeps_the_most_recent_messages() {
+        let mut room = Room::new("Lab", TurnPolicy::RoundRobin);
+        room.context_limit = 3;
+        let transcript: Vec<Message> = (0..10)
+            .map(|i| Message::from_user(&room.id, format!("message {i}")))
+            .collect();
+
+        let window = room.context_window(&transcript);
+        assert_eq!(window.len(), 3);
+        // The current question is at the end, so it must be the one kept.
+        assert_eq!(window[2].content, "message 9");
+    }
+
+    #[test]
+    fn a_short_transcript_passes_through_whole() {
+        let mut room = Room::new("Lab", TurnPolicy::RoundRobin);
+        room.context_limit = 40;
+        let transcript = vec![Message::from_user(&room.id, "only one")];
+        assert_eq!(room.context_window(&transcript).len(), 1);
+    }
+
+    #[test]
+    fn a_limit_of_zero_means_the_whole_transcript() {
+        let mut room = Room::new("Lab", TurnPolicy::RoundRobin);
+        room.context_limit = 0;
+        let transcript: Vec<Message> = (0..100)
+            .map(|i| Message::from_user(&room.id, format!("m{i}")))
+            .collect();
+        assert_eq!(room.context_window(&transcript).len(), 100);
+    }
+
+    #[test]
+    fn an_absurd_context_limit_is_rejected() {
+        let mut room = Room::new("Lab", TurnPolicy::RoundRobin);
+        room.context_limit = 5_000;
+        assert!(room.validate().is_err());
     }
 
     #[test]

@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS rooms (
     policy       TEXT NOT NULL,
     rounds       INTEGER NOT NULL DEFAULT 1,
     moderator_id TEXT,
+    context_limit INTEGER NOT NULL DEFAULT 40,
     created_at   TEXT NOT NULL
 );
 
@@ -98,7 +99,19 @@ impl Store {
         connection.pragma_update(None, "journal_mode", "WAL")?;
         connection.pragma_update(None, "foreign_keys", "ON")?;
         connection.execute_batch(SCHEMA)?;
+        migrate(connection)?;
         Ok(())
+    }
+
+    /// Adds columns that were introduced after the first release.
+    ///
+    /// `CREATE TABLE IF NOT EXISTS` leaves an existing table untouched, so a
+    /// database created by an older version keeps its old shape until the
+    /// missing columns are added here.
+    fn missing_columns(connection: &Connection, table: &str) -> Result<Vec<String>> {
+        let mut statement = connection.prepare(&format!("PRAGMA table_info({table})"))?;
+        let names = statement.query_map([], |row| row.get::<_, String>(1))?;
+        Ok(names.collect::<rusqlite::Result<Vec<_>>>()?)
     }
 
     /// Runs `work` on the blocking pool with the shared connection.
@@ -230,13 +243,26 @@ impl Store {
     }
 }
 
+/// Brings an older database up to the current schema.
+fn migrate(connection: &Connection) -> Result<()> {
+    let columns = Store::missing_columns(connection, "rooms")?;
+    if !columns.iter().any(|name| name == "context_limit") {
+        connection.execute(
+            "ALTER TABLE rooms ADD COLUMN context_limit INTEGER NOT NULL DEFAULT 40",
+            [],
+        )?;
+    }
+    Ok(())
+}
+
 fn write_room(connection: &Connection, room: &Room) -> rusqlite::Result<usize> {
     connection.execute(
-        "INSERT INTO rooms (id, name, topic, policy, rounds, moderator_id, created_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+        "INSERT INTO rooms (id, name, topic, policy, rounds, moderator_id, context_limit, created_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
          ON CONFLICT(id) DO UPDATE SET
              name = excluded.name, topic = excluded.topic, policy = excluded.policy,
-             rounds = excluded.rounds, moderator_id = excluded.moderator_id",
+             rounds = excluded.rounds, moderator_id = excluded.moderator_id,
+             context_limit = excluded.context_limit",
         params![
             room.id,
             room.name,
@@ -244,6 +270,7 @@ fn write_room(connection: &Connection, room: &Room) -> rusqlite::Result<usize> {
             room.policy.as_str(),
             room.rounds,
             room.moderator_id,
+            room.context_limit,
             room.created_at
         ],
     )
@@ -304,6 +331,7 @@ fn read_room(row: &Row) -> rusqlite::Result<Room> {
         policy: policy_from_row(row, "policy")?,
         rounds: row.get("rounds")?,
         moderator_id: row.get("moderator_id")?,
+        context_limit: row.get("context_limit")?,
         agents: Vec::new(),
         created_at: row.get("created_at")?,
     })
@@ -385,6 +413,70 @@ mod tests {
         room.agents
             .push(Agent::new("Vera", "anthropic-main", "claude-opus-5").with_reasoning(true));
         room
+    }
+
+    /// Builds a database in the shape v1.0.2 produced, before `context_limit`
+    /// existed, so the migration is tested against the real old schema rather
+    /// than an assumption about it.
+    fn legacy_database() -> Connection {
+        let connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(
+                "CREATE TABLE rooms (
+                     id           TEXT PRIMARY KEY,
+                     name         TEXT NOT NULL,
+                     topic        TEXT NOT NULL DEFAULT '',
+                     policy       TEXT NOT NULL,
+                     rounds       INTEGER NOT NULL DEFAULT 1,
+                     moderator_id TEXT,
+                     created_at   TEXT NOT NULL
+                 );
+                 INSERT INTO rooms (id, name, topic, policy, rounds, created_at)
+                 VALUES ('old-room', 'Legacy', 'Databases', 'debate', 2, '2026-08-01T10:00:00Z');",
+            )
+            .unwrap();
+        connection
+    }
+
+    #[tokio::test]
+    async fn a_database_from_an_older_version_is_migrated_and_readable() {
+        let connection = legacy_database();
+        Store::prepare(&connection).unwrap();
+        let store = Store {
+            connection: Arc::new(Mutex::new(connection)),
+        };
+
+        let room = store.load_room("old-room").await.unwrap();
+        assert_eq!(room.name, "Legacy");
+        assert_eq!(room.rounds, 2);
+        // The new column arrives with its default rather than failing the read.
+        assert_eq!(room.context_limit, 40);
+    }
+
+    #[tokio::test]
+    async fn migrating_an_already_current_database_changes_nothing() {
+        let store = Store::in_memory().unwrap();
+        let room = sample_room();
+        store.save_room(&room).await.unwrap();
+
+        // Running the preparation again must stay harmless. The lock lives in
+        // its own scope so it cannot be held across the await below.
+        {
+            let connection = Arc::clone(&store.connection);
+            let guard = connection.lock().unwrap();
+            Store::prepare(&guard).unwrap();
+        }
+
+        assert_eq!(store.load_room(&room.id).await.unwrap().name, "Lab");
+    }
+
+    #[tokio::test]
+    async fn the_context_limit_survives_a_round_trip() {
+        let store = Store::in_memory().unwrap();
+        let mut room = sample_room();
+        room.context_limit = 12;
+        store.save_room(&room).await.unwrap();
+        assert_eq!(store.load_room(&room.id).await.unwrap().context_limit, 12);
     }
 
     #[tokio::test]

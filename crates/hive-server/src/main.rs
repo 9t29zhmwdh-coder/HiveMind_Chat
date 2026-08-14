@@ -10,7 +10,7 @@ use std::net::SocketAddr;
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
-use axum::routing::{delete, get, put};
+use axum::routing::{delete, get, post, put};
 use axum::Router;
 use clap::Parser;
 use hive_core::{HiveConfig, Store, VERSION};
@@ -86,10 +86,14 @@ async fn main() -> Result<()> {
     let listener = tokio::net::TcpListener::bind(bind).await?;
     tracing::info!(%bind, version = VERSION, "HiveMind Chat is listening");
 
-    axum::serve(listener, app)
-        .with_graceful_shutdown(shutdown_signal())
-        .await
-        .context("the server stopped unexpectedly")
+    // ConnectInfo makes the caller's address available to the audit log.
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .with_graceful_shutdown(shutdown_signal())
+    .await
+    .context("the server stopped unexpectedly")
 }
 
 /// An instance reachable from the network without a token is open to everyone
@@ -131,6 +135,7 @@ fn build_router(state: AppState, web_root: &PathBuf) -> Router {
         .route("/api/rooms/{room_id}", get(api::get_room))
         .route("/api/rooms/{room_id}", put(api::update_room))
         .route("/api/rooms/{room_id}", delete(api::delete_room))
+        .route("/api/rooms/{room_id}/duplicate", post(api::duplicate_room))
         .route(
             "/api/rooms/{room_id}/transcript",
             get(api::export_transcript),
@@ -194,6 +199,33 @@ mod tests {
         )
         .unwrap();
         build_router(state, &PathBuf::from("frontend/dist"))
+    }
+
+    /// Sends a request and parses the JSON body.
+    async fn json_call(
+        app: Router,
+        method: &str,
+        uri: &str,
+        body: Option<serde_json::Value>,
+    ) -> serde_json::Value {
+        let mut request = Request::builder().method(method).uri(uri);
+        if body.is_some() {
+            request = request.header("content-type", "application/json");
+        }
+        let payload = body
+            .map(|value| Body::from(value.to_string()))
+            .unwrap_or_else(Body::empty);
+        let response = app.oneshot(request.body(payload).unwrap()).await.unwrap();
+        assert!(
+            response.status().is_success(),
+            "{method} {uri} returned {}",
+            response.status()
+        );
+        let bytes = http_body_util::BodyExt::collect(response.into_body())
+            .await
+            .unwrap()
+            .to_bytes();
+        serde_json::from_slice(&bytes).unwrap()
     }
 
     async fn status(app: Router, uri: &str, token: Option<&str>) -> StatusCode {
@@ -281,6 +313,49 @@ mod tests {
             status(app, &format!("/api/rooms/{room_id}"), None).await,
             StatusCode::OK
         );
+    }
+
+    #[tokio::test]
+    async fn duplicating_a_room_creates_a_second_one_with_its_own_agents() {
+        let app = app(None);
+        let body = serde_json::json!({
+            "name": "Lab",
+            "policy": "parallel",
+            "agents": [{"name": "Scout", "provider_id": "local", "model": "llama3:8b"}],
+        });
+        let created: serde_json::Value =
+            json_call(app.clone(), "POST", "/api/rooms", Some(body)).await;
+        let room_id = created["id"].as_str().unwrap().to_string();
+
+        let copy: serde_json::Value = json_call(
+            app.clone(),
+            "POST",
+            &format!("/api/rooms/{room_id}/duplicate"),
+            None,
+        )
+        .await;
+
+        assert_eq!(copy["name"], "Lab (copy)");
+        assert_ne!(copy["id"], created["id"]);
+        assert_ne!(copy["agents"][0]["id"], created["agents"][0]["id"]);
+
+        let rooms: serde_json::Value = json_call(app, "GET", "/api/rooms", None).await;
+        assert_eq!(rooms.as_array().unwrap().len(), 2);
+    }
+
+    #[tokio::test]
+    async fn duplicating_an_unknown_room_is_not_found() {
+        let response = app(None)
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri("/api/rooms/does-not-exist/duplicate")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
     }
 
     #[tokio::test]

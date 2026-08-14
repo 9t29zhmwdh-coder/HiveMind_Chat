@@ -35,6 +35,20 @@ jobs:
       - name: Test
         run: cargo test --workspace --locked
 
+  msrv:
+    name: Minimum supported Rust version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Verifies the rust-version in Cargo.toml and the claim in the README,
+      # rather than trusting that whatever stable happens to be still matches.
+      - uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # master
+        with:
+          toolchain: "1.88"
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - name: Check
+        run: cargo check --workspace --locked
+
   frontend:
     name: Web UI
     runs-on: ubuntu-latest

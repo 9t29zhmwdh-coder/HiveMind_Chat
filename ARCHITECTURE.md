@@ -113,6 +113,15 @@ the stored transcript, and the turns still streaming. A partial answer lives
 outside the transcript until its `agent_completed` event arrives, so it can
 never be mistaken for a stored message.
 
+The room is loaded over REST as well as over the socket. The socket is the live
+source once it is ready; until then the REST copy lets the room render, so a
+slow or failed socket still leaves a readable transcript rather than an empty
+screen.
+
+In a parallel room, consecutive agent turns of the same round are grouped into
+one comparison block and laid out in columns. That grouping is a UI concern
+only: the transcript itself is a flat list, exactly as it is stored.
+
 ## Deliberate limits
 
 - **No user accounts.** A single shared access token, or loopback only. Adding

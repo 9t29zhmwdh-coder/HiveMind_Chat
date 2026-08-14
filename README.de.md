@@ -26,13 +26,14 @@ HiveMind Chat setzt mehrere Sprachmodelle in ein Gespräch und gibt diesem Gespr
 - **Lokale und gehostete Modelle im selben Raum.** Ollama braucht überhaupt keine Zugangsdaten. Daneben lassen sich bis zu 16 Endpunkte eintragen, sodass mehrere Konten und mehrere gehostete Modelle am selben Gespräch teilnehmen können.
 - **Eine Implementierung deckt viele Endpunkte ab.** Ollama, die Anthropic Messages API und alles, was den OpenAI-Chat-Completions-Dialekt spricht, also LM Studio, vLLM, llama.cpp, Groq und Together.
 - **Zugangsdaten werden nie gespeichert.** Ein Provider-Eintrag enthält den *Namen* einer Umgebungsvariable, nie einen Schlüssel. Nichts Sensibles landet in der Datenbank, in der Konfigurationsdatei oder in einem Backup davon.
+- **Modelle nebeneinander lesen.** Im Parallel-Ablauf stehen die Antworten nebeneinander statt untereinander, was einen Vergleich erst wirklich lesbar macht. Jeder Raum lässt sich duplizieren, um dieselbe Besetzung für eine neue Frage zu nutzen, und der Verlauf ist durchsuchbar.
 - **Live-Streaming.** Token-Deltas kommen über eine WebSocket-Verbindung, du siehst also jeden Agenten denken, statt auf eine Textwand zu warten.
 - **Terminal-Client inklusive.** `hive` legt Räume an, fügt Agenten hinzu, führt Runden aus und exportiert Transkripte, ohne Browser und ohne laufenden Server.
 - **Transkripte bleiben bei dir.** Alles landet in einer SQLite-Datei und lässt sich als Markdown exportieren.
 
 ## Voraussetzungen
 
-- Rust 1.82 oder neuer und Node.js 22 oder neuer, um aus dem Quelltext zu bauen. Ein Container-Build braucht beides nicht.
+- Rust 1.88 oder neuer und Node.js 22 oder neuer, um aus dem Quelltext zu bauen. Ein Container-Build braucht beides nicht.
 - [Ollama](https://ollama.com) für lokale Modelle, oder Zugangsdaten für einen gehosteten Endpunkt.
 - Linux, macOS oder Docker. Windows ist ungetestet.
 
@@ -117,4 +118,4 @@ Zugangsdaten liegen nur in deiner Umgebung oder in der `.env`-Datei; die entfern
 
 ---
 
-**Autor:** [Rafael Yilmaz](https://github.com/9t29zhmwdh-coder) · **Status:** Early Release · ![version](https://img.shields.io/github/v/release/9t29zhmwdh-coder/HiveMind_Chat?color=6b7280&style=flat-square) · **Lizenz:** MIT
+**Autor:** [Rafael Yilmaz](https://github.com/9t29zhmwdh-coder) · **Status:** Active · ![version](https://img.shields.io/github/v/release/9t29zhmwdh-coder/HiveMind_Chat?color=6b7280&style=flat-square) · **Lizenz:** MIT

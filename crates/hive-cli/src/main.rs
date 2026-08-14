@@ -43,47 +43,80 @@ enum Command {
     /// List configured providers and whether their credential resolves.
     Providers,
     /// List the models a provider currently serves.
-    Models { provider_id: String },
+    Models {
+        /// Provider id from the configuration file, for example `local`.
+        provider_id: String,
+    },
     /// List the rooms in the database.
     Rooms,
     /// Create a room.
     NewRoom {
+        /// Name of the room.
         name: String,
         /// One of: parallel, round_robin, debate, moderated, consensus.
         #[arg(long, default_value = "round_robin")]
         policy: String,
+        /// What the room is about. Included in every agent's prompt.
         #[arg(long, default_value = "")]
         topic: String,
+        /// How many times each agent speaks per prompt.
         #[arg(long, default_value_t = 1)]
         rounds: u32,
     },
     /// Add an agent to a room.
     AddAgent {
+        /// Room to add the agent to.
         room_id: String,
+        /// Display name, used as the speaker label in the transcript.
         name: String,
+        /// Provider id from the configuration file.
         provider_id: String,
+        /// Model name as the provider serves it, for example `llama3:8b`.
         model: String,
+        /// How this agent should behave and what it should argue for.
         #[arg(long, default_value = "")]
         persona: String,
+        /// Let the model reason before answering. Slower, and the reasoning is
+        /// drawn from the same token budget as the answer.
         #[arg(long)]
         reasoning: bool,
     },
     /// Show a room and its transcript.
     Show {
+        /// Room to show.
         room_id: String,
+        /// How many of the most recent messages to print.
         #[arg(long, default_value_t = 50)]
         limit: u32,
     },
     /// Send a prompt to a room and stream the conversation.
-    Chat { room_id: String, prompt: String },
+    Chat {
+        /// Room to talk to.
+        room_id: String,
+        /// What to ask the room.
+        prompt: String,
+    },
     /// Print the transcript as Markdown.
     Export {
+        /// Room to export.
         room_id: String,
+        /// How many of the most recent messages to include.
         #[arg(long, default_value_t = 500)]
         limit: u32,
     },
+    /// Copy a room's line-up into a new room, without its transcript.
+    DuplicateRoom {
+        /// Room whose line-up should be copied.
+        room_id: String,
+        /// Name for the copy. Defaults to the original plus "(copy)".
+        #[arg(long)]
+        name: Option<String>,
+    },
     /// Delete a room and its transcript.
-    DeleteRoom { room_id: String },
+    DeleteRoom {
+        /// Room to delete. This cannot be undone.
+        room_id: String,
+    },
 }
 
 #[tokio::main]
@@ -130,6 +163,9 @@ async fn main() -> Result<()> {
         Command::Show { room_id, limit } => rooms::show_room(&store, &room_id, limit).await,
         Command::Chat { room_id, prompt } => chat(&store, &config, &room_id, &prompt).await,
         Command::Export { room_id, limit } => rooms::export(&store, &room_id, limit).await,
+        Command::DuplicateRoom { room_id, name } => {
+            rooms::duplicate_room(&store, &room_id, name.as_deref()).await
+        }
         Command::DeleteRoom { room_id } => rooms::delete_room(&store, &room_id).await,
     }
 }

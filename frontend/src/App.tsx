@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { api, storeToken, storedToken, UnauthorizedError, type RoomInput } from "./api";
+import { api, storeToken, storedToken, UnauthorizedError, type RoomDetail, type RoomInput } from "./api";
 import { detectLanguage, storeLanguage, STRINGS, type Language, type Strings } from "./i18n";
 import { useSession } from "./useSession";
 import { Logo } from "./components/Logo";
@@ -19,9 +19,16 @@ export function App(): React.ReactElement {
   const [editing, setEditing] = useState<{ room: Room | null } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
+  const [query, setQuery] = useState("");
+  const [detail, setDetail] = useState<RoomDetail | null>(null);
 
   const session = useSession(locked ? null : activeId);
-  const room = session.room;
+
+  // The room is fetched over REST as well as over the socket. The socket is the
+  // live source once it is ready, but until then the REST copy lets the room
+  // render and stay readable even if the socket never connects at all.
+  const room = session.room ?? detail;
+  const messages = session.room ? session.messages : (detail?.messages ?? []);
 
   const refresh = useCallback(async () => {
     try {
@@ -50,12 +57,42 @@ export function App(): React.ReactElement {
     }
   }, [rooms, activeId]);
 
+  useEffect(() => {
+    let active = true;
+    setDetail(null);
+    if (!activeId || locked) {
+      return;
+    }
+    api
+      .room(activeId)
+      .then((loaded) => {
+        if (active) {
+          setDetail(loaded);
+        }
+      })
+      .catch(() => {
+        // The socket reports its own failure; a second banner adds nothing.
+      });
+    return () => {
+      active = false;
+    };
+  }, [activeId, locked]);
+
   const saveRoom = async (input: RoomInput): Promise<void> => {
     const target = editing?.room;
     const saved = target ? await api.updateRoom(target.id, input) : await api.createRoom(input);
     setEditing(null);
     await refresh();
     setActiveId(saved.id);
+  };
+
+  const duplicateRoom = async (): Promise<void> => {
+    if (!activeId) {
+      return;
+    }
+    const copy = await api.duplicateRoom(activeId);
+    await refresh();
+    setActiveId(copy.id);
   };
 
   const removeRoom = async (): Promise<void> => {
@@ -125,7 +162,10 @@ export function App(): React.ReactElement {
               key={entry.id}
               type="button"
               className={entry.id === activeId ? "room-item active" : "room-item"}
-              onClick={() => setActiveId(entry.id)}
+              onClick={() => {
+                setActiveId(entry.id);
+                setQuery("");
+              }}
             >
               <strong>{entry.name}</strong>
               <span>
@@ -173,8 +213,19 @@ export function App(): React.ReactElement {
                 </div>
               </div>
               <div className="actions">
+                <input
+                  className="search"
+                  type="search"
+                  value={query}
+                  placeholder={strings.search}
+                  aria-label={strings.search}
+                  onChange={(event) => setQuery(event.target.value)}
+                />
                 <button type="button" className="ghost" onClick={() => setEditing({ room })}>
                   {strings.agents}
+                </button>
+                <button type="button" className="ghost" onClick={() => void duplicateRoom()}>
+                  {strings.duplicateRoom}
                 </button>
                 <button type="button" className="ghost" onClick={() => void exportTranscript()}>
                   {strings.exportTranscript}
@@ -201,11 +252,13 @@ export function App(): React.ReactElement {
 
             <Transcript
               strings={strings}
-              messages={session.messages}
+              messages={messages}
               pending={session.pending}
               votes={session.votes}
               agents={room.agents}
               round={session.round}
+              compare={room.policy === "parallel"}
+              query={query}
             />
 
             {session.error && <div className="banner">{session.error}</div>}

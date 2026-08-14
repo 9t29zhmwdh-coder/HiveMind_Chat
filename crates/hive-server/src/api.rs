@@ -1,12 +1,49 @@
 //! REST endpoints for configuration, rooms and transcripts.
 
-use axum::extract::{Path, Query, State};
+use axum::extract::{ConnectInfo, FromRequestParts, Path, Query, State};
+use axum::http::request::Parts;
 use axum::Json;
 use hive_core::{Agent, Message, Room, RoomSummary, TurnPolicy, VERSION};
 use serde::{Deserialize, Serialize};
+use std::net::SocketAddr;
 
 use crate::error::{ApiError, ApiResult};
 use crate::state::AppState;
+
+/// The address a request came from, when the server knows it.
+///
+/// `ConnectInfo` is absent in tests and behind some transports, and a missing
+/// address must not turn an audited operation into a rejected request, so this
+/// extractor never fails.
+pub struct Caller(pub Option<SocketAddr>);
+
+impl<S: Send + Sync> FromRequestParts<S> for Caller {
+    type Rejection = std::convert::Infallible;
+
+    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+        Ok(Self(
+            parts
+                .extensions
+                .get::<ConnectInfo<SocketAddr>>()
+                .map(|info| info.0),
+        ))
+    }
+}
+
+/// Records an operation that changes or removes stored data.
+///
+/// There are no user accounts, so the caller is identified by its address.
+/// Behind a reverse proxy that is the proxy, which is why the log says
+/// `caller` rather than `user`.
+fn audit(operation: &str, room_id: &str, caller: Option<&SocketAddr>) {
+    tracing::info!(
+        target: "hivemind::audit",
+        operation,
+        room_id,
+        caller = caller.map(|address| address.to_string()).unwrap_or_else(|| "local".into()),
+        "audit"
+    );
+}
 
 /// How many messages a room hands back by default.
 const DEFAULT_TRANSCRIPT_LIMIT: u32 = 500;
@@ -249,13 +286,28 @@ pub async fn get_room(
 pub async fn update_room(
     State(state): State<AppState>,
     Path(room_id): Path<String>,
+    caller: Caller,
     Json(input): Json<RoomInput>,
 ) -> ApiResult<Json<Room>> {
     let existing = state.store.load_room(&room_id).await?;
     let room = input.into_room(Some(&existing));
     validate_providers(&state, &room)?;
     state.store.save_room(&room).await?;
+    audit("room.update", &room.id, caller.0.as_ref());
     Ok(Json(room))
+}
+
+/// Copies a room's line-up into a new room, without its transcript.
+pub async fn duplicate_room(
+    State(state): State<AppState>,
+    Path(room_id): Path<String>,
+    caller: Caller,
+) -> ApiResult<Json<Room>> {
+    let source = state.store.load_room(&room_id).await?;
+    let copy = source.duplicate(format!("{} (copy)", source.name));
+    state.store.save_room(&copy).await?;
+    audit("room.duplicate", &copy.id, caller.0.as_ref());
+    Ok(Json(copy))
 }
 
 pub async fn delete_room(

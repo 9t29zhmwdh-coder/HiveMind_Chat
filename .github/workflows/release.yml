@@ -35,6 +35,11 @@ jobs:
         run: npm ci && npm run build
       - name: Build the binaries
         run: cargo build --release --locked --target ${{ matrix.target }} --bin hivemind-server --bin hive
+      - name: Generate SBOMs
+        run: |
+          cargo install cargo-cyclonedx --locked
+          cargo cyclonedx --format json --all
+          (cd frontend && npm sbom --sbom-format cyclonedx > ../frontend-sbom.cdx.json)
       - name: Package
         run: |
           staging="hivemind-chat-${{ matrix.target }}"
@@ -43,6 +48,8 @@ jobs:
           cp target/${{ matrix.target }}/release/hive "$staging/"
           cp -R frontend/dist/* "$staging/web/"
           cp README.md LICENSE hivemind.example.toml "$staging/"
+          mkdir -p "$staging/sbom"
+          find . -name "*.cdx.json" -not -path "./target/*" -not -path "*/node_modules/*" -exec cp {} "$staging/sbom/" \;
           tar czf "$staging.tar.gz" "$staging"
           shasum -a 256 "$staging.tar.gz" > "$staging.tar.gz.sha256"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

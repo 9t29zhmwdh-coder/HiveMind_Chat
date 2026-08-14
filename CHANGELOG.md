@@ -16,8 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Dependency updates: rusqlite 0.37 to 0.40, tower-http 0.6 to 0.7, vite 7 to 8,
-  and the container build image from Node 22 to Node 26.
+- Dependency updates: rusqlite 0.37 to 0.40, tower-http 0.6 to 0.7, toml 0.9 to
+  1.1, vite 7 to 8, TypeScript 5 to 7, the React plugin 5 to 6, and the
+  container build image from Node 22 to Node 26.
 
 ## [1.0.1] - 2026-08-14
 

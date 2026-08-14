@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # The web UI is built first so the Rust stage can copy the finished bundle.
-FROM node:22-bookworm-slim AS web
+FROM node:26-bookworm-slim AS web
 WORKDIR /build
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci

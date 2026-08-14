@@ -208,7 +208,10 @@ export function App(): React.ReactElement {
               <div>
                 <h2>{room.name}</h2>
                 <div className="meta">
-                  {room.policy} · {strings.rounds}: {room.rounds}
+                  {room.policy} · {strings.rounds}: {room.rounds} ·{" "}
+                  {room.context_limit === 0
+                    ? strings.contextWhole
+                    : strings.contextRecent.replace("{n}", String(room.context_limit))}
                   {room.topic ? ` · ${room.topic}` : ""}
                 </div>
               </div>

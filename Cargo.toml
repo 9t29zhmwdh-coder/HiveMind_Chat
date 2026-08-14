@@ -5,7 +5,7 @@ members = ["crates/hive-core", "crates/hive-server", "crates/hive-cli"]
 [workspace.package]
 version = "1.0.0"
 edition = "2021"
-rust-version = "1.82"
+rust-version = "1.88"
 license = "MIT"
 repository = "https://github.com/9t29zhmwdh-coder/HiveMind_Chat"
 

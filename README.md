@@ -33,7 +33,7 @@ HiveMind Chat puts several language models into one conversation and gives that 
 
 ## Requirements
 
-- Rust 1.82 or newer, and Node.js 22 or newer, to build from source. A container build needs neither.
+- Rust 1.88 or newer, and Node.js 22 or newer, to build from source. A container build needs neither.
 - [Ollama](https://ollama.com) for local models, or a credential for a hosted endpoint.
 - Linux, macOS or Docker. Windows is untested.
 

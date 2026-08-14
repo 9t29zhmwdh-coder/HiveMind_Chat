@@ -16,7 +16,12 @@ is a commitment to a date.
 - SQLite persistence and Markdown export
 - Container image with a hardened compose file
 
-## v1.1.0 (planned)
+## v1.1.0 (current)
+
+- Per-room context limit, so a long-running room keeps producing prompts a
+  model can accept
+
+## v1.2.0 (planned)
 
 - **Agent presets.** A named persona plus model that can be dropped into any
   room. Room duplication covers most of this today, which is why it is not

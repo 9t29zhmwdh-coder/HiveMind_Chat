@@ -27,6 +27,7 @@ HiveMind Chat setzt mehrere Sprachmodelle in ein Gespräch und gibt diesem Gespr
 - **Eine Implementierung deckt viele Endpunkte ab.** Ollama, die Anthropic Messages API und alles, was den OpenAI-Chat-Completions-Dialekt spricht, also LM Studio, vLLM, llama.cpp, Groq und Together.
 - **Zugangsdaten werden nie gespeichert.** Ein Provider-Eintrag enthält den *Namen* einer Umgebungsvariable, nie einen Schlüssel. Nichts Sensibles landet in der Datenbank, in der Konfigurationsdatei oder in einem Backup davon.
 - **Modelle nebeneinander lesen.** Im Parallel-Ablauf stehen die Antworten nebeneinander statt untereinander, was einen Vergleich erst wirklich lesbar macht. Jeder Raum lässt sich duplizieren, um dieselbe Besetzung für eine neue Frage zu nutzen, und der Verlauf ist durchsuchbar.
+- **Ein Raum hält lange durch.** Jeder Agent sieht den jüngsten Abschnitt des Verlaufs statt des ganzen, damit ein Raum, den du weiter nutzt, nicht irgendwann einen Prompt erzeugt, den kein Modell mehr annimmt. Das Fenster gilt pro Raum und lässt sich abschalten.
 - **Live-Streaming.** Token-Deltas kommen über eine WebSocket-Verbindung, du siehst also jeden Agenten denken, statt auf eine Textwand zu warten.
 - **Terminal-Client inklusive.** `hive` legt Räume an, fügt Agenten hinzu, führt Runden aus und exportiert Transkripte, ohne Browser und ohne laufenden Server.
 - **Transkripte bleiben bei dir.** Alles landet in einer SQLite-Datei und lässt sich als Markdown exportieren.

@@ -137,6 +137,18 @@ pub async fn export(store: &Store, room_id: &str, limit: u32) -> Result<()> {
     Ok(())
 }
 
+pub async fn duplicate_room(store: &Store, room_id: &str, name: Option<&str>) -> Result<()> {
+    let source = store.load_room(room_id).await?;
+    let title = match name {
+        Some(name) => name.to_string(),
+        None => format!("{} (copy)", source.name),
+    };
+    let copy = source.duplicate(title);
+    store.save_room(&copy).await?;
+    println!("{}", copy.id);
+    Ok(())
+}
+
 pub async fn delete_room(store: &Store, room_id: &str) -> Result<()> {
     store.delete_room(room_id).await?;
     println!("deleted {room_id}");

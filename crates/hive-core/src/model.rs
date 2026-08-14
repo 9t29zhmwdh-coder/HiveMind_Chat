@@ -297,6 +297,38 @@ impl Room {
         }
     }
 
+    /// A copy of the room with its line-up but without its transcript.
+    ///
+    /// Every agent gets a fresh id: the ids are primary keys, so reusing them
+    /// would make the copy overwrite the original's agents on save.
+    pub fn duplicate(&self, name: impl Into<String>) -> Self {
+        let mut copy = Self::new(name, self.policy);
+        copy.topic = self.topic.clone();
+        copy.rounds = self.rounds;
+        copy.agents = self
+            .agents
+            .iter()
+            .map(|agent| {
+                let mut clone = agent.clone();
+                clone.id = Uuid::new_v4().to_string();
+                clone
+            })
+            .collect();
+        // The moderator is identified by agent id, so it has to be remapped
+        // onto the copy's agent rather than carried over.
+        copy.moderator_id = self
+            .moderator_position()
+            .and_then(|position| copy.agents.get(position).map(|agent| agent.id.clone()));
+        copy
+    }
+
+    fn moderator_position(&self) -> Option<usize> {
+        let moderator_id = self.moderator_id.as_deref()?;
+        self.agents
+            .iter()
+            .position(|agent| agent.id == moderator_id)
+    }
+
     pub fn active_agents(&self) -> Vec<&Agent> {
         self.agents.iter().filter(|a| a.enabled).collect()
     }
@@ -407,6 +439,44 @@ mod tests {
         assert!(validate_prompt("   ").is_err());
         assert!(validate_prompt(&"a".repeat(MAX_PROMPT_CHARS + 1)).is_err());
         assert!(validate_prompt("Compare both approaches.").is_ok());
+    }
+
+    #[test]
+    fn a_duplicated_room_keeps_the_line_up_but_not_the_identity() {
+        let mut room = Room::new("Lab", TurnPolicy::Debate);
+        room.topic = "Storage".to_string();
+        room.rounds = 3;
+        room.agents
+            .push(Agent::new("Scout", "local", "llama3:8b").with_persona("Simple."));
+        room.agents.push(Agent::new("Vera", "local", "gemma4"));
+
+        let copy = room.duplicate("Lab (copy)");
+
+        assert_ne!(copy.id, room.id);
+        assert_eq!(copy.name, "Lab (copy)");
+        assert_eq!(copy.topic, "Storage");
+        assert_eq!(copy.rounds, 3);
+        assert_eq!(copy.agents.len(), 2);
+        assert_eq!(copy.agents[0].persona, "Simple.");
+        // Fresh agent ids, or saving the copy would overwrite the original.
+        assert_ne!(copy.agents[0].id, room.agents[0].id);
+        assert_ne!(copy.agents[1].id, room.agents[1].id);
+    }
+
+    #[test]
+    fn duplicating_remaps_the_moderator_onto_the_new_agents() {
+        let mut room = Room::new("Board", TurnPolicy::Moderated);
+        room.agents.push(Agent::new("Mia", "local", "m0"));
+        room.agents.push(Agent::new("Ada", "local", "m1"));
+        room.moderator_id = Some(room.agents[0].id.clone());
+
+        let copy = room.duplicate("Board (copy)");
+
+        assert_eq!(
+            copy.moderator_id.as_deref(),
+            Some(copy.agents[0].id.as_str())
+        );
+        assert!(copy.validate().is_ok());
     }
 
     #[test]

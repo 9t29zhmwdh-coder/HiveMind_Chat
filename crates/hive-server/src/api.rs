@@ -258,6 +258,17 @@ pub async fn update_room(
     Ok(Json(room))
 }
 
+/// Copies a room's line-up into a new room, without its transcript.
+pub async fn duplicate_room(
+    State(state): State<AppState>,
+    Path(room_id): Path<String>,
+) -> ApiResult<Json<Room>> {
+    let source = state.store.load_room(&room_id).await?;
+    let copy = source.duplicate(format!("{} (copy)", source.name));
+    state.store.save_room(&copy).await?;
+    Ok(Json(copy))
+}
+
 pub async fn delete_room(
     State(state): State<AppState>,
     Path(room_id): Path<String>,

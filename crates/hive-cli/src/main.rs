@@ -82,6 +82,13 @@ enum Command {
         #[arg(long, default_value_t = 500)]
         limit: u32,
     },
+    /// Copy a room's line-up into a new room, without its transcript.
+    DuplicateRoom {
+        room_id: String,
+        /// Name for the copy. Defaults to the original plus "(copy)".
+        #[arg(long)]
+        name: Option<String>,
+    },
     /// Delete a room and its transcript.
     DeleteRoom { room_id: String },
 }
@@ -130,6 +137,9 @@ async fn main() -> Result<()> {
         Command::Show { room_id, limit } => rooms::show_room(&store, &room_id, limit).await,
         Command::Chat { room_id, prompt } => chat(&store, &config, &room_id, &prompt).await,
         Command::Export { room_id, limit } => rooms::export(&store, &room_id, limit).await,
+        Command::DuplicateRoom { room_id, name } => {
+            rooms::duplicate_room(&store, &room_id, name.as_deref()).await
+        }
         Command::DeleteRoom { room_id } => rooms::delete_room(&store, &room_id).await,
     }
 }

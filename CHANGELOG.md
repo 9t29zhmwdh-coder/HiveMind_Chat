@@ -5,6 +5,21 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-08-14
+
+### Fixed
+
+- The speaker label a model added to its own answer was only stripped from the
+  stored message, so a client rendering the live stream still showed it until
+  the finished message replaced it. The opening of an answer is now held back
+  just long enough to decide, and the label never reaches the stream.
+
+### Changed
+
+- Dependency updates: rusqlite 0.37 to 0.40, tower-http 0.6 to 0.7, toml 0.9 to
+  1.1, vite 7 to 8, TypeScript 5 to 7, the React plugin 5 to 6, and the
+  container build image from Node 22 to Node 26.
+
 ## [1.0.1] - 2026-08-14
 
 ### Fixed
@@ -58,5 +73,6 @@ First release.
 - Reasoning is off unless an agent opts in, because reasoning tokens are drawn
   from the same `max_tokens` budget as the answer.
 
+[1.0.2]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.0.2
 [1.0.1]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.0.1
 [1.0.0]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.0.0

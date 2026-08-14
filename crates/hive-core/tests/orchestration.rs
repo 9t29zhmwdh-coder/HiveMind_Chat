@@ -400,7 +400,7 @@ async fn a_model_that_labels_its_own_answer_is_corrected() {
         vec![Agent::new("Ada", "alpha", "m1")],
     );
 
-    let (messages, _) = run(
+    let (messages, _events) = run(
         &room,
         registry_with(std::slice::from_ref(&alpha)),
         "Which store?",
@@ -409,6 +409,17 @@ async fn a_model_that_labels_its_own_answer_is_corrected() {
 
     assert_eq!(messages[1].content, "I favour SQLite.");
     assert_eq!(messages[1].speaker, "Ada");
+
+    // The label must not reach the stream either, or a client that renders
+    // deltas live shows it before the finished message replaces it.
+    let streamed: String = _events
+        .iter()
+        .filter_map(|event| match event {
+            SessionEvent::AgentDelta { text, .. } => Some(text.as_str()),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(streamed, "I favour SQLite.");
 }
 
 #[tokio::test]

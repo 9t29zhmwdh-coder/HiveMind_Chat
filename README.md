@@ -26,6 +26,7 @@ HiveMind Chat puts several language models into one conversation and gives that 
 - **Local and hosted models in one room.** Ollama needs no credential at all. Alongside it you can register up to 16 endpoints, so several accounts and several hosted models can take part in the same conversation.
 - **One implementation covers many endpoints.** Ollama, the Anthropic Messages API, and anything speaking the OpenAI chat completions dialect, which includes LM Studio, vLLM, llama.cpp, Groq and Together.
 - **Credentials are never stored.** A provider entry holds the *name* of an environment variable, never a key. Nothing sensitive reaches the database, the config file, or a backup of either.
+- **Read the models against each other.** In the parallel policy the answers are laid out side by side rather than stacked, which is what makes a comparison actually readable. Any room can be duplicated to reuse its line-up on a new question, and the transcript is searchable.
 - **Live streaming.** Token deltas arrive over a WebSocket, so you see each agent think out loud rather than waiting for a wall of text.
 - **Terminal client included.** `hive` creates rooms, adds agents, runs turns and exports transcripts without a browser or a running server.
 - **Transcripts you keep.** Everything lands in one SQLite file and exports as Markdown.
@@ -117,4 +118,4 @@ Credentials live only in your environment or `.env` file; remove those separatel
 
 ---
 
-**Author:** [Rafael Yilmaz](https://github.com/9t29zhmwdh-coder) · **Status:** Early Release · ![version](https://img.shields.io/github/v/release/9t29zhmwdh-coder/HiveMind_Chat?color=6b7280&style=flat-square) · **License:** MIT
+**Author:** [Rafael Yilmaz](https://github.com/9t29zhmwdh-coder) · **Status:** Active · ![version](https://img.shields.io/github/v/release/9t29zhmwdh-coder/HiveMind_Chat?color=6b7280&style=flat-square) · **License:** MIT

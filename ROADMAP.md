@@ -3,27 +3,28 @@
 Version numbers follow [Semantic Versioning](https://semver.org). Nothing here
 is a commitment to a date.
 
-## v0.1.0 (current)
+## v1.0.0 (current)
 
 - Five turn policies: parallel, round robin, debate, moderated, consensus
 - Ollama, Anthropic Messages API, and OpenAI-compatible endpoints
 - Credentials by environment variable reference only
 - Live streaming over WebSocket
+- Side-by-side comparison view for parallel rooms
+- Transcript search and room duplication
 - Web UI in English and German
 - Terminal client
 - SQLite persistence and Markdown export
 - Container image with a hardened compose file
 
-## v0.2.0 (planned)
+## v1.1.0 (planned)
 
-- **Per-room model comparison view.** The parallel policy already produces the
-  data; the UI should lay the answers out side by side rather than as a list.
-- **Transcript search.** Across rooms, from the sidebar.
 - **Agent presets.** A named persona plus model that can be dropped into any
-  room, instead of retyping it.
+  room. Room duplication covers most of this today, which is why it is not
+  urgent.
 - **Round-level retry.** Re-run one agent's turn without re-running the room.
+- **Search across rooms.** Today the search is per room.
 
-## v0.3.0 (considered)
+## Considered
 
 - **Tool use.** Letting an agent call a tool changes the trust model
   substantially, so it needs a permission design first, not just an
@@ -48,7 +49,6 @@ is a commitment to a date.
 
 ## Dual-licensing readiness
 
-Not applicable for now. HiveMind Chat is MIT and stays MIT. The problem it
-solves is one of curiosity and evaluation rather than a business process, and
-the honest answer is that it has no enterprise surface worth licensing
-separately.
+Not applicable. HiveMind Chat is MIT and stays MIT. The problem it solves is
+one of curiosity and evaluation rather than a business process, and the honest
+answer is that it has no enterprise surface worth licensing separately.

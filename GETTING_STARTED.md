@@ -87,7 +87,21 @@ Open the room's settings and change the policy:
 - **moderated** needs three agents: one moderator plus two others. The
   moderator decides who speaks each round.
 
-## 6. The terminal, if you prefer it
+In a parallel room the answers appear **side by side** instead of stacked.
+That layout is the point of the policy: two answers to the same question are
+much easier to judge next to each other than one after the other.
+
+## 6. Reusing and searching
+
+Two buttons in the room header carry most of the day-to-day weight:
+
+- **Duplicate** copies the room's line-up into a new room without its
+  transcript. Once you have a set of agents you like, this is how you point
+  them at the next question.
+- The **search box** filters the transcript and highlights the matches, which
+  is what you want once a room has run for a while.
+
+## 7. The terminal, if you prefer it
 
 Everything above works without a browser, against the same database:
 
@@ -96,9 +110,10 @@ hive providers
 hive rooms
 hive chat <room-id> "Which one would you actually ship?"
 hive export <room-id> > transcript.md
+hive duplicate-room <room-id> --name "Same panel, new question"
 ```
 
-## 7. Adding a hosted model
+## 8. Adding a hosted model
 
 Only if you want one. Add the account to `hivemind.toml`:
 

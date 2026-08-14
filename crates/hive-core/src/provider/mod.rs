@@ -112,6 +112,14 @@ impl ProviderRegistry {
         Ok(Self { providers })
     }
 
+    /// Registers a provider that does not come from the configuration file.
+    ///
+    /// This is how an embedder plugs in a dialect the crate does not ship, and
+    /// how the integration tests drive the orchestrator without a network.
+    pub fn insert(&mut self, provider: Arc<dyn ModelProvider>) {
+        self.providers.insert(provider.id().to_string(), provider);
+    }
+
     pub fn get(&self, id: &str) -> Result<Arc<dyn ModelProvider>> {
         self.providers
             .get(id)

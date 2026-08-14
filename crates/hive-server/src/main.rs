@@ -86,10 +86,14 @@ async fn main() -> Result<()> {
     let listener = tokio::net::TcpListener::bind(bind).await?;
     tracing::info!(%bind, version = VERSION, "HiveMind Chat is listening");
 
-    axum::serve(listener, app)
-        .with_graceful_shutdown(shutdown_signal())
-        .await
-        .context("the server stopped unexpectedly")
+    // ConnectInfo makes the caller's address available to the audit log.
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .with_graceful_shutdown(shutdown_signal())
+    .await
+    .context("the server stopped unexpectedly")
 }
 
 /// An instance reachable from the network without a token is open to everyone

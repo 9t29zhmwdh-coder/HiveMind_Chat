@@ -376,20 +376,35 @@ impl Orchestrator {
         let mut stream = provider.chat(request).await?;
         let mut text = String::new();
         let mut usage = TokenUsage::default();
+        // The opening deltas are held back until it is clear whether the model
+        // wrote its own speaker label, so the label never reaches a client that
+        // renders deltas as they arrive.
+        let mut opening = Opening::new(&agent.name);
 
         while let Some(chunk) = stream.next().await {
             match chunk? {
                 ChatChunk::Delta(delta) => {
                     text.push_str(&delta);
-                    let _ = events
-                        .send(SessionEvent::AgentDelta {
-                            agent_id: agent.id.clone(),
-                            text: delta,
-                        })
-                        .await;
+                    if let Some(visible) = opening.accept(delta) {
+                        let _ = events
+                            .send(SessionEvent::AgentDelta {
+                                agent_id: agent.id.clone(),
+                                text: visible,
+                            })
+                            .await;
+                    }
                 }
                 ChatChunk::Done(counts) => usage = counts,
             }
+        }
+
+        if let Some(visible) = opening.flush() {
+            let _ = events
+                .send(SessionEvent::AgentDelta {
+                    agent_id: agent.id.clone(),
+                    text: visible,
+                })
+                .await;
         }
 
         if text.trim().is_empty() {
@@ -446,6 +461,55 @@ impl Orchestrator {
             reasoning: agent.reasoning,
         };
         Ok((provider, request))
+    }
+}
+
+/// Withholds the start of an answer until a self-added speaker label can be
+/// ruled out.
+///
+/// Only the first few characters are buffered: as soon as enough has arrived to
+/// decide, the cleaned text is released and every later delta passes straight
+/// through.
+struct Opening {
+    label: String,
+    buffer: String,
+    settled: bool,
+}
+
+impl Opening {
+    fn new(name: &str) -> Self {
+        Self {
+            label: name.to_string(),
+            buffer: String::new(),
+            settled: false,
+        }
+    }
+
+    /// Returns the text to forward, if any is ready yet.
+    fn accept(&mut self, delta: String) -> Option<String> {
+        if self.settled {
+            return Some(delta);
+        }
+        self.buffer.push_str(&delta);
+        // One more byte than the label plus its colon is enough to decide.
+        if self.buffer.len() <= self.label.len() + 1 {
+            return None;
+        }
+        self.settled = true;
+        let cleaned = strip_self_prefix(&self.buffer, &self.label).to_string();
+        self.buffer.clear();
+        (!cleaned.is_empty()).then_some(cleaned)
+    }
+
+    /// Releases whatever is still buffered when the stream ends early.
+    fn flush(&mut self) -> Option<String> {
+        if self.settled || self.buffer.is_empty() {
+            return None;
+        }
+        self.settled = true;
+        let cleaned = strip_self_prefix(&self.buffer, &self.label).to_string();
+        self.buffer.clear();
+        (!cleaned.is_empty()).then_some(cleaned)
     }
 }
 
@@ -514,6 +578,39 @@ fn strip_label<'a>(line: &'a str, label: &str) -> Option<&'a str> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_opening_withholds_the_label_from_the_stream() {
+        let mut opening = Opening::new("Ada");
+        assert_eq!(opening.accept("Ada".into()), None);
+        assert_eq!(opening.accept(": I ".into()), Some("I ".to_string()));
+        // Once settled, everything passes straight through.
+        assert_eq!(opening.accept("agree.".into()), Some("agree.".to_string()));
+    }
+
+    #[test]
+    fn the_opening_passes_an_unlabelled_answer_through_unchanged() {
+        let mut opening = Opening::new("Ada");
+        assert_eq!(
+            opening.accept("I agree".into()),
+            Some("I agree".to_string())
+        );
+    }
+
+    #[test]
+    fn a_short_answer_is_released_when_the_stream_ends() {
+        let mut opening = Opening::new("Ada");
+        assert_eq!(opening.accept("Yes".into()), None);
+        assert_eq!(opening.flush(), Some("Yes".to_string()));
+        assert_eq!(opening.flush(), None);
+    }
+
+    #[test]
+    fn an_answer_that_is_only_the_label_releases_nothing() {
+        let mut opening = Opening::new("Ada");
+        assert_eq!(opening.accept("Ada: ".into()), None);
+        assert_eq!(opening.flush(), None);
+    }
 
     #[test]
     fn a_self_added_speaker_label_is_removed() {

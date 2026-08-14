@@ -26,7 +26,7 @@ tracing-subscriber.workspace = true
 axum = { version = "0.8", features = ["ws", "macros"] }
 clap = { version = "4.5", features = ["derive", "env"] }
 tower = "0.5"
-tower-http = { version = "0.6", features = ["fs", "cors", "trace", "limit"] }
+tower-http = { version = "0.7", features = ["fs", "cors", "trace", "limit"] }
 
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }

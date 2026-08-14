@@ -392,6 +392,26 @@ async fn deltas_are_streamed_and_add_up_to_the_stored_message() {
 }
 
 #[tokio::test]
+async fn a_model_that_labels_its_own_answer_is_corrected() {
+    // Smaller models copy the `Name:` shape they see for their peers.
+    let alpha = ScriptedProvider::always("alpha", "Ada: I favour SQLite.");
+    let room = room_with(
+        TurnPolicy::RoundRobin,
+        vec![Agent::new("Ada", "alpha", "m1")],
+    );
+
+    let (messages, _) = run(
+        &room,
+        registry_with(std::slice::from_ref(&alpha)),
+        "Which store?",
+    )
+    .await;
+
+    assert_eq!(messages[1].content, "I favour SQLite.");
+    assert_eq!(messages[1].speaker, "Ada");
+}
+
+#[tokio::test]
 async fn the_session_reports_the_summed_token_usage() {
     let alpha = ScriptedProvider::always("alpha", "A.");
     let beta = ScriptedProvider::always("beta", "B.");

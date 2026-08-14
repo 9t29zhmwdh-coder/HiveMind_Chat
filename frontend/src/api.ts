@@ -93,6 +93,8 @@ export const api = {
   createRoom: (input: RoomInput) => request<Room>("/api/rooms", { method: "POST", body: JSON.stringify(input) }),
   updateRoom: (id: string, input: RoomInput) =>
     request<Room>(`/api/rooms/${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify(input) }),
+  duplicateRoom: (id: string) =>
+    request<Room>(`/api/rooms/${encodeURIComponent(id)}/duplicate`, { method: "POST" }),
   deleteRoom: (id: string) => request<{ deleted: boolean }>(`/api/rooms/${encodeURIComponent(id)}`, { method: "DELETE" }),
   clearTranscript: (id: string) =>
     request<{ deleted: boolean }>(`/api/rooms/${encodeURIComponent(id)}/transcript`, { method: "DELETE" }),

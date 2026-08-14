@@ -525,3 +525,33 @@ label {
   color: var(--danger);
   font-size: 12px;
 }
+
+/* Parallel answers are read against each other, so they get columns. */
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+  max-width: 1400px;
+}
+
+.compare-grid .turn {
+  max-width: none;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+
+.search {
+  width: 210px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+mark.hit {
+  background: #4a4413;
+  color: var(--text);
+  border-radius: 3px;
+  padding: 0 2px;
+}

@@ -398,7 +398,8 @@ impl Orchestrator {
                 "the model returned no text",
             ));
         }
-        let mut message = Message::from_agent(&room.id, agent, text.trim(), round);
+        let cleaned = strip_self_prefix(text.trim(), &agent.name);
+        let mut message = Message::from_agent(&room.id, agent, cleaned, round);
         message.usage = Some(usage);
         Ok(message)
     }
@@ -445,6 +446,24 @@ impl Orchestrator {
             reasoning: agent.reasoning,
         };
         Ok((provider, request))
+    }
+}
+
+/// Removes a speaker label the model added to its own answer.
+///
+/// Peers appear as `Name: text` in the prompt, so a model that pattern-matches
+/// on that shape writes its own name too. The room adds the label when it
+/// renders, and the house rules ask the model not to, but smaller models do it
+/// anyway, so the duplicate is stripped here rather than fought in the prompt.
+fn strip_self_prefix<'a>(text: &'a str, name: &str) -> &'a str {
+    let rest = match text.strip_prefix(name) {
+        Some(rest) => rest,
+        None => return text,
+    };
+    // Only a real label counts: the name has to be followed by a colon.
+    match rest.strip_prefix(':') {
+        Some(body) => body.trim_start(),
+        None => text,
     }
 }
 
@@ -495,6 +514,30 @@ fn strip_label<'a>(line: &'a str, label: &str) -> Option<&'a str> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_self_added_speaker_label_is_removed() {
+        assert_eq!(strip_self_prefix("Ada: I agree.", "Ada"), "I agree.");
+        assert_eq!(strip_self_prefix("Ada:I agree.", "Ada"), "I agree.");
+    }
+
+    #[test]
+    fn text_that_merely_starts_with_the_name_is_left_alone() {
+        assert_eq!(
+            strip_self_prefix("Ada agrees with Ben.", "Ada"),
+            "Ada agrees with Ben."
+        );
+        assert_eq!(strip_self_prefix("Adalene: hello", "Ada"), "Adalene: hello");
+    }
+
+    #[test]
+    fn another_speakers_label_is_left_alone() {
+        // Quoting a peer is legitimate content and must survive.
+        assert_eq!(
+            strip_self_prefix("Ben: was right.", "Ada"),
+            "Ben: was right."
+        );
+    }
 
     #[test]
     fn vote_lines_are_extracted() {

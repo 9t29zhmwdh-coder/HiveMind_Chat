@@ -5,6 +5,16 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-08-14
+
+### Fixed
+
+- An agent that put its own name in front of its answer produced a doubled
+  speaker label in the transcript. Peers appear as `Name: text` in the prompt,
+  so smaller models copy that shape for themselves despite the house rule
+  against it. The label is now stripped when it matches the speaker, while a
+  quoted peer label and text that merely starts with the name are left alone.
+
 ## [1.0.0] - 2026-08-14
 
 First release.
@@ -48,4 +58,5 @@ First release.
 - Reasoning is off unless an agent opts in, because reasoning tokens are drawn
   from the same `max_tokens` budget as the answer.
 
+[1.0.1]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.0.1
 [1.0.0]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.0.0

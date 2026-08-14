@@ -1,0 +1,33 @@
+services:
+  hivemind:
+    build: .
+    image: hivemind-chat:local
+    container_name: hivemind-chat
+    restart: unless-stopped
+    ports:
+      # Bound to loopback by default. Publish on 0.0.0.0 only together with
+      # HIVEMIND_ACCESS_TOKEN, or the instance is open to the whole network.
+      - "127.0.0.1:8750:8750"
+    volumes:
+      - hivemind-data:/data
+    environment:
+      # Every credential is passed by reference: the container reads these
+      # variables, and nothing is ever written to the database or config file.
+      HIVEMIND_ACCESS_TOKEN: ${HIVEMIND_ACCESS_TOKEN:-}
+      HIVEMIND_KEY_ANTHROPIC: ${HIVEMIND_KEY_ANTHROPIC:-}
+      HIVEMIND_KEY_OPENAI: ${HIVEMIND_KEY_OPENAI:-}
+      HIVEMIND_KEY_GROQ: ${HIVEMIND_KEY_GROQ:-}
+      RUST_LOG: ${RUST_LOG:-info}
+    # Reaching an Ollama instance on the host rather than in the compose file.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+
+volumes:
+  hivemind-data:

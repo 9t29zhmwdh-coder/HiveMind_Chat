@@ -54,10 +54,12 @@ pub async fn create_room(
     policy: &str,
     topic: &str,
     rounds: u32,
+    context_limit: u32,
 ) -> Result<()> {
     let mut room = Room::new(name, crate::parse_policy(policy)?);
     room.topic = topic.to_string();
     room.rounds = rounds;
+    room.context_limit = context_limit;
     store.save_room(&room).await?;
     println!("{}", room.id);
     Ok(())
@@ -94,8 +96,12 @@ pub async fn add_agent(
 
 pub async fn show_room(store: &Store, room_id: &str, limit: u32) -> Result<()> {
     let room = store.load_room(room_id).await?;
+    let window = match room.context_limit {
+        0 => "whole transcript".to_string(),
+        limit => format!("last {limit} messages"),
+    };
     println!(
-        "{} · {} · {} round(s)",
+        "{} · {} · {} round(s) · context: {window}",
         room.name,
         room.policy.as_str(),
         room.rounds
@@ -207,7 +213,7 @@ mod tests {
     #[tokio::test]
     async fn creating_a_room_persists_its_policy_and_rounds() {
         let store = Store::in_memory().unwrap();
-        create_room(&store, "Lab", "consensus", "Databases", 3)
+        create_room(&store, "Lab", "consensus", "Databases", 3, 25)
             .await
             .unwrap();
 
@@ -218,12 +224,15 @@ mod tests {
         let room = store.load_room(&summaries[0].id).await.unwrap();
         assert_eq!(room.rounds, 3);
         assert_eq!(room.topic, "Databases");
+        assert_eq!(room.context_limit, 25);
     }
 
     #[tokio::test]
     async fn creating_a_room_with_an_unknown_policy_fails() {
         let store = Store::in_memory().unwrap();
-        assert!(create_room(&store, "Lab", "shouting", "", 1).await.is_err());
+        assert!(create_room(&store, "Lab", "shouting", "", 1, 40)
+            .await
+            .is_err());
         assert!(store.list_rooms().await.unwrap().is_empty());
     }
 }

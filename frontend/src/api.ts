@@ -80,6 +80,7 @@ export interface RoomInput {
   policy: Room["policy"];
   rounds: number;
   moderator_id?: string | null;
+  context_limit: number;
   agents: AgentInput[];
 }
 

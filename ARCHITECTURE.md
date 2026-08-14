@@ -44,14 +44,17 @@ core and the same database.
 3. The orchestrator loads the policy and derives the speaking order. The
    starting position rotates per round, because the first speaker measurably
    frames what follows.
-4. For each speaker, the transcript is projected into that agent's point of
+4. The transcript is cut to the room's context window: the most recent
+   messages, never the oldest. The transcript itself keeps everything; only
+   what reaches the model is trimmed.
+5. For each speaker, the visible slice is projected into that agent's point of
    view: its own turns become assistant turns, everyone else's become user
    turns prefixed with the speaker name. Chat dialects have no concept of a
    named third participant, so without that prefix a model cannot tell two
    peers apart.
-5. The provider streams the answer. Deltas are forwarded as `SessionEvent`s
+6. The provider streams the answer. Deltas are forwarded as `SessionEvent`s
    and buffered into a complete `Message`.
-6. When the turn ends, the produced messages are written to SQLite in one
+7. When the turn ends, the produced messages are written to SQLite in one
    transaction.
 
 ## Turn policies
@@ -102,7 +105,9 @@ logs. The web UI is told only whether a credential currently resolves.
 
 ## Storage
 
-One SQLite file with three tables: `rooms`, `agents` and `messages`. WAL is on,
+One SQLite file with three tables: `rooms`, `agents` and `messages`. Columns
+added after a release are applied to an existing database on open, so an older
+file keeps working rather than failing to read. WAL is on,
 so the UI can read a transcript while a turn is still writing to it. Every
 query runs on the blocking pool; the async runtime is never blocked by disk IO.
 

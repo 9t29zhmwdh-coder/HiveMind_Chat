@@ -21,6 +21,7 @@ export function RoomDialog({ strings, providers, policies, room, onSave, onCance
   const [topic, setTopic] = useState(room?.topic ?? "");
   const [policy, setPolicy] = useState<TurnPolicy>(room?.policy ?? "round_robin");
   const [rounds, setRounds] = useState(room?.rounds ?? 1);
+  const [contextLimit, setContextLimit] = useState(room?.context_limit ?? 40);
   const [agents, setAgents] = useState<AgentInput[]>(room?.agents.map(toInput) ?? []);
   const [moderatorId, setModeratorId] = useState<string | null>(room?.moderator_id ?? null);
   const [editing, setEditing] = useState<{ agent: AgentInput; index: number } | null>(null);
@@ -84,6 +85,19 @@ export function RoomDialog({ strings, providers, policies, room, onSave, onCance
               onChange={(event) => setRounds(Number(event.target.value))}
             />
           </div>
+        </div>
+
+        <div className="field">
+          <label htmlFor="room-context">{strings.contextLimit}</label>
+          <input
+            id="room-context"
+            type="number"
+            min={0}
+            max={1000}
+            value={contextLimit}
+            onChange={(event) => setContextLimit(Number(event.target.value))}
+          />
+          <p className="hint">{strings.contextHint}</p>
         </div>
 
         {policy === "moderated" && (
@@ -150,6 +164,7 @@ export function RoomDialog({ strings, providers, policies, room, onSave, onCance
                 policy,
                 rounds,
                 moderator_id: policy === "moderated" ? moderatorId : null,
+                context_limit: contextLimit,
                 agents,
               })
             }

@@ -423,6 +423,39 @@ async fn a_model_that_labels_its_own_answer_is_corrected() {
 }
 
 #[tokio::test]
+async fn the_context_limit_trims_what_the_model_is_shown() {
+    let alpha = ScriptedProvider::always("alpha", "Noted.");
+    let mut room = room_with(
+        TurnPolicy::RoundRobin,
+        vec![Agent::new("Ada", "alpha", "m1")],
+    );
+    room.context_limit = 2;
+
+    // A transcript long enough that an unlimited prompt would carry all of it.
+    let history: Vec<Message> = (0..10)
+        .map(|i| Message::from_user(&room.id, format!("old message {i}")))
+        .collect();
+
+    let orchestrator = Orchestrator::new(registry_with(std::slice::from_ref(&alpha)));
+    let (tx, mut rx) = mpsc::channel(64);
+    let drain = tokio::spawn(async move { while rx.recv().await.is_some() {} });
+    orchestrator
+        .run(&room, &history, "What now?", &tx)
+        .await
+        .expect("the turn failed");
+    drop(tx);
+    drain.await.unwrap();
+
+    let seen = alpha.requests()[0].transcript();
+    // The newest entries and the current question survive.
+    assert!(seen.contains("What now?"), "{seen}");
+    assert!(seen.contains("old message 9"), "{seen}");
+    // The oldest ones are dropped rather than sent to the model.
+    assert!(!seen.contains("old message 0"), "{seen}");
+    assert!(!seen.contains("old message 5"), "{seen}");
+}
+
+#[tokio::test]
 async fn the_session_reports_the_summed_token_usage() {
     let alpha = ScriptedProvider::always("alpha", "A.");
     let beta = ScriptedProvider::always("beta", "B.");

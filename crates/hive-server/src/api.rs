@@ -159,8 +159,15 @@ pub struct RoomInput {
     pub rounds: u32,
     #[serde(default)]
     pub moderator_id: Option<String>,
+    /// Most recent messages each agent is shown. 0 means the whole transcript.
+    #[serde(default = "default_context_limit")]
+    pub context_limit: u32,
     #[serde(default)]
     pub agents: Vec<AgentInput>,
+}
+
+fn default_context_limit() -> u32 {
+    40
 }
 
 fn one() -> u32 {
@@ -205,6 +212,7 @@ impl RoomInput {
         room.policy = self.policy;
         room.rounds = self.rounds;
         room.moderator_id = self.moderator_id;
+        room.context_limit = self.context_limit;
         room.agents = self
             .agents
             .into_iter()
@@ -400,6 +408,7 @@ mod tests {
             policy: TurnPolicy::Debate,
             rounds: 2,
             moderator_id: None,
+            context_limit: 40,
             agents: vec![AgentInput {
                 id: None,
                 name: "Scout".into(),

@@ -57,7 +57,10 @@ fn peer_list(room: &Room, agent: &Agent) -> String {
 /// In [`crate::model::TurnPolicy::Parallel`] the other agents' contributions are withheld, so
 /// every model answers the same input and the outputs stay comparable.
 pub fn turns_for(room: &Room, agent: &Agent, history: &[Message]) -> Vec<ChatTurn> {
-    let visible = history.iter().filter(|message| {
+    // Only the most recent stretch of the transcript is shown, so a room that
+    // has been used for a while still produces a prompt a model can accept.
+    let window = room.context_window(history);
+    let visible = window.iter().filter(|message| {
         room.policy.agents_see_each_other()
             || message.agent_id.is_none()
             || message.agent_id.as_deref() == Some(&agent.id)

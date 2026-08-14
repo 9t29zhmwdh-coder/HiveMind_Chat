@@ -25,6 +25,8 @@ export interface Room {
   policy: TurnPolicy;
   rounds: number;
   moderator_id?: string | null;
+  /** How many recent messages each agent is shown. 0 means the whole transcript. */
+  context_limit: number;
   agents: Agent[];
   created_at: string;
 }

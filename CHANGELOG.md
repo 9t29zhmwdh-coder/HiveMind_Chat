@@ -5,6 +5,20 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-08-14
+
+### Added
+
+- A per-room context limit. Each agent is shown only the most recent messages
+  rather than the whole transcript, because the transcript keeps growing while a
+  model's context window does not. The default is 40 messages; 0 keeps the old
+  behaviour of sending everything. Existing databases are migrated in place.
+
+### Fixed
+
+- Reading a database created by an earlier version no longer fails when the
+  schema has gained a column since.
+
 ## [1.0.2] - 2026-08-14
 
 ### Fixed
@@ -73,6 +87,7 @@ First release.
 - Reasoning is off unless an agent opts in, because reasoning tokens are drawn
   from the same `max_tokens` budget as the answer.
 
+[1.1.0]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.1.0
 [1.0.2]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.0.2
 [1.0.1]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.0.1
 [1.0.0]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.0.0

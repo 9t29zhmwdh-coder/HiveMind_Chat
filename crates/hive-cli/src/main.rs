@@ -62,6 +62,10 @@ enum Command {
         /// How many times each agent speaks per prompt.
         #[arg(long, default_value_t = 1)]
         rounds: u32,
+        /// How many recent messages each agent is shown. 0 for the whole
+        /// transcript, which will eventually exceed a model's context window.
+        #[arg(long, default_value_t = 40)]
+        context_limit: u32,
     },
     /// Add an agent to a room.
     AddAgent {
@@ -139,7 +143,8 @@ async fn main() -> Result<()> {
             policy,
             topic,
             rounds,
-        } => rooms::create_room(&store, &name, &policy, &topic, rounds).await,
+            context_limit,
+        } => rooms::create_room(&store, &name, &policy, &topic, rounds, context_limit).await,
         Command::AddAgent {
             room_id,
             name,

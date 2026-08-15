@@ -9,7 +9,7 @@
 
 HiveMind Chat puts several language models into one conversation and gives that conversation a shape: they answer in turn, take opposing stances, get moderated by one of their own, or discuss and then vote. Local and hosted models sit in the same room, and every turn streams live.
 
-[![CI](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/ci.yml/badge.svg)](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/ci.yml) [![CodeQL](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/codeql.yml/badge.svg)](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/codeql.yml) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/9t29zhmwdh-coder/HiveMind_Chat/badge)](https://securityscorecards.dev/viewer/?uri=github.com/9t29zhmwdh-coder/HiveMind_Chat)
+[![CI](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/ci.yml/badge.svg)](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/ci.yml) [![CodeQL](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/codeql.yml/badge.svg)](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/codeql.yml) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/9t29zhmwdh-coder/HiveMind_Chat/badge)](https://securityscorecards.dev/viewer/?uri=github.com/9t29zhmwdh-coder/HiveMind_Chat) [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/14087/badge)](https://www.bestpractices.dev/projects/14087)
 ![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Docker-lightgrey) ![Rust](https://img.shields.io/badge/Rust-CE422B?logo=rust&logoColor=white) ![React](https://img.shields.io/badge/React-20232a?logo=react&logoColor=61dafb) ![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white) ![AI | Claude Code](https://img.shields.io/badge/AI-Claude_Code-black?logo=anthropic&logoColor=white) ![AI | Ollama](https://img.shields.io/badge/AI-Ollama-black?logo=ollama&logoColor=white)
 
 > **How it runs:** `hivemind-server` is a single binary that serves both the JSON API and the web UI on one port, bound to `127.0.0.1:8750` by default, and keeps its state in one SQLite file. There is no installer and no background service. `hive` is the same thing without a browser: it drives rooms straight from the terminal against the same database.
@@ -100,6 +100,7 @@ export HIVEMIND_KEY_ANTHROPIC="..."
 
 - [GETTING_STARTED.md](GETTING_STARTED.md) walks through a first room step by step.
 - [ARCHITECTURE.md](ARCHITECTURE.md) explains how a prompt becomes a conversation.
+- [docs/api.md](docs/api.md) is the reference for the HTTP API and the socket, so the server can be driven from a script.
 - [SECURITY.md](SECURITY.md) covers credential handling and how to report a vulnerability.
 - [ROADMAP.md](ROADMAP.md) lists what is planned and what is deliberately out of scope.
 

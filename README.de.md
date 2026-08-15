@@ -9,7 +9,7 @@
 
 HiveMind Chat setzt mehrere Sprachmodelle in ein Gespräch und gibt diesem Gespräch eine Form: Sie antworten reihum, beziehen gegensätzliche Positionen, werden von einem aus ihrer Mitte moderiert, oder diskutieren und stimmen danach ab. Lokale und gehostete Modelle sitzen im selben Raum, und jeder Beitrag wird live gestreamt.
 
-[![CI](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/ci.yml/badge.svg)](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/ci.yml) [![CodeQL](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/codeql.yml/badge.svg)](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/codeql.yml) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/9t29zhmwdh-coder/HiveMind_Chat/badge)](https://securityscorecards.dev/viewer/?uri=github.com/9t29zhmwdh-coder/HiveMind_Chat)
+[![CI](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/ci.yml/badge.svg)](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/ci.yml) [![CodeQL](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/codeql.yml/badge.svg)](https://github.com/9t29zhmwdh-coder/HiveMind_Chat/actions/workflows/codeql.yml) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/9t29zhmwdh-coder/HiveMind_Chat/badge)](https://securityscorecards.dev/viewer/?uri=github.com/9t29zhmwdh-coder/HiveMind_Chat) [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/14087/badge)](https://www.bestpractices.dev/projects/14087)
 ![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Docker-lightgrey) ![Rust](https://img.shields.io/badge/Rust-CE422B?logo=rust&logoColor=white) ![React](https://img.shields.io/badge/React-20232a?logo=react&logoColor=61dafb) ![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white) ![AI | Claude Code](https://img.shields.io/badge/AI-Claude_Code-black?logo=anthropic&logoColor=white) ![AI | Ollama](https://img.shields.io/badge/AI-Ollama-black?logo=ollama&logoColor=white)
 
 > **So läuft es:** `hivemind-server` ist eine einzelne Binärdatei, die JSON-API und Web-UI auf demselben Port ausliefert, standardmässig gebunden an `127.0.0.1:8750`, und ihren Zustand in einer einzigen SQLite-Datei hält. Es gibt keinen Installer und keinen Hintergrunddienst. `hive` ist dasselbe ohne Browser: Es steuert Räume direkt aus dem Terminal gegen dieselbe Datenbank.
@@ -100,6 +100,7 @@ export HIVEMIND_KEY_ANTHROPIC="..."
 
 - [GETTING_STARTED.md](GETTING_STARTED.md) führt Schritt für Schritt durch den ersten Raum.
 - [ARCHITECTURE.md](ARCHITECTURE.md) erklärt, wie aus einer Frage ein Gespräch wird.
+- [docs/api.md](docs/api.md) ist die Referenz für die HTTP-API und die Socket-Verbindung, damit sich der Server aus einem Skript steuern lässt.
 - [SECURITY.md](SECURITY.md) behandelt den Umgang mit Zugangsdaten und die Meldung von Schwachstellen.
 - [ROADMAP.md](ROADMAP.md) listet Geplantes und bewusst Ausgeschlossenes.
 

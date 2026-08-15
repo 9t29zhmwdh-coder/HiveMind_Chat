@@ -1,14 +1,14 @@
 # syntax=docker/dockerfile:1
 
 # The web UI is built first so the Rust stage can copy the finished bundle.
-FROM node:26-bookworm-slim AS web
+FROM node:26-bookworm-slim@sha256:cd565714d4da3e84bfd341e31448f81d47c6362198f152345297c9c1154e6341 AS web
 WORKDIR /build
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 COPY frontend/ ./
 RUN npm run build
 
-FROM rust:1-bookworm AS server
+FROM rust:1-bookworm@sha256:0e2bcaef56d041a486784e54104a81aebe0da44bd03019bd70bc0401e42e4a97 AS server
 WORKDIR /build
 # Dependency manifests are copied first so a source-only change reuses the
 # cached dependency build.
@@ -28,7 +28,7 @@ COPY crates/ crates/
 RUN touch crates/*/src/*.rs \
     && cargo build --release --locked --bin hivemind-server --bin hive
 
-FROM debian:bookworm-slim AS runtime
+FROM debian:bookworm-slim@sha256:abd67ffcfa541b485a3dff59865ab629aa048a6c613e639d36e7456b0b229241 AS runtime
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates \
     && rm -rf /var/lib/apt/lists/* \

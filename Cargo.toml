@@ -3,14 +3,14 @@ resolver = "2"
 members = ["crates/hive-core", "crates/hive-server", "crates/hive-cli"]
 
 [workspace.package]
-version = "1.1.1"
+version = "1.1.2"
 edition = "2021"
 rust-version = "1.88"
 license = "MIT"
 repository = "https://github.com/9t29zhmwdh-coder/HiveMind_Chat"
 
 [workspace.dependencies]
-hive-core = { path = "crates/hive-core", version = "1.1.1" }
+hive-core = { path = "crates/hive-core", version = "1.1.2" }
 
 anyhow = "1"
 async-trait = "0.1"

@@ -22,7 +22,7 @@ This is the part of the design most worth reviewing.
 - A provider entry stores the **name** of an environment variable (`api_key_env`), never a key. `SecretRef` resolves it per request and drops the value immediately.
 - No credential is written to SQLite, to `hivemind.toml`, or to any API response. The web UI is told only whether a credential currently resolves.
 - Environment variable names are restricted to `A-Z`, `0-9` and underscore, so a configuration file cannot smuggle shell syntax into a variable lookup.
-- Provider error bodies are not echoed to the client: they have been observed to quote request headers. Only the status line is surfaced; the body goes to the trace log at debug level.
+- Provider error bodies are not echoed to the client: they have been observed to quote request headers. Only the status line is surfaced; the body goes to the debug log.
 - `redact()` exists for the rare status output that needs to distinguish two keys, and keeps only the last four characters.
 
 ## Network Exposure
@@ -46,6 +46,16 @@ identity available; behind a reverse proxy it is the proxy's.
 [docs/threat-model.md](docs/threat-model.md) contains the STRIDE analysis,
 the trust boundaries, and the limitations that are knowingly accepted for this
 release.
+
+## Release Review
+
+Every release is checked against a written list before it is tagged, and the
+completed list is published rather than kept private, so the claims on this page
+can be held against something. Each one records what was verified and how, and
+carries a maintainer sign-off.
+
+- [docs/security-checklist-v1.1.0.md](docs/security-checklist-v1.1.0.md), current
+- [docs/security-checklist-v1.0.0.md](docs/security-checklist-v1.0.0.md)
 
 ## Input Handling
 

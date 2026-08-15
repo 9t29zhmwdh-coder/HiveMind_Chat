@@ -90,6 +90,15 @@ rather than omitted.
 ## Sign-off
 
 - Prepared by: Claude Opus 5, as AI pair
-- Reviewed by: *pending maintainer review*
-- Date: 2026-08-14
+- Verified on 2026-08-15 by re-checking every claim above against the repository
+  rather than against this document: repository security settings via the GitHub
+  API, absence of `authors` and `author` metadata fields, committed lock files,
+  bound SQL parameters, the constant-time token comparison, the audit target,
+  the provider error path, and a full run of `cargo audit`, `npm audit` and the
+  test suite
+- Signed off by: Rafael Yilmaz, maintainer
+- Date: 2026-08-15
 - Release version: v1.0.0
+
+The checklist for the current release is
+[security-checklist-v1.1.0.md](security-checklist-v1.1.0.md).

@@ -154,7 +154,7 @@ fn build_provider(config: &ProviderConfig) -> Result<Arc<dyn ModelProvider>> {
 /// Turns a non-success HTTP response into an error without echoing the body.
 ///
 /// Provider error bodies have been observed to quote request headers, so only
-/// the status line is surfaced to the caller and the body goes to the trace log.
+/// the status line is surfaced to the caller and the body goes to the debug log.
 pub(crate) async fn error_from_response(
     provider_id: &str,
     response: reqwest::Response,

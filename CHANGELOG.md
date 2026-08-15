@@ -5,6 +5,21 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-08-15
+
+### Added
+
+- The security checklist for v1.1.0, covering everything shipped since v1.0.0.
+  Both checklists now carry a maintainer sign-off and are linked from
+  SECURITY.md, so the security claims made there can be held against a record of
+  what was actually verified.
+
+### Fixed
+
+- SECURITY.md described the provider error body as going "to the trace log at
+  debug level", which contradicts itself. It goes to the debug log, as the code
+  always did.
+
 ## [1.1.0] - 2026-08-14
 
 ### Added
@@ -87,6 +102,7 @@ First release.
 - Reasoning is off unless an agent opts in, because reasoning tokens are drawn
   from the same `max_tokens` budget as the answer.
 
+[1.1.1]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.1.1
 [1.1.0]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.1.0
 [1.0.2]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.0.2
 [1.0.1]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.0.1

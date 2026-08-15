@@ -5,6 +5,22 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-08-15
+
+### Added
+
+- `docs/api.md`, a reference for the HTTP API and the WebSocket: every route,
+  the error codes, the limits, both frame directions and the orchestrator
+  events. Every example in it was run against a live server rather than derived
+  from the source.
+- The OpenSSF Best Practices badge. The project is registered as 14087.
+
+### Changed
+
+- The three container base images are pinned to their manifest digests instead
+  of floating tags, so a build cannot silently pick up a different image.
+  Dependabot already watches the Docker ecosystem and will move the pins.
+
 ## [1.1.1] - 2026-08-15
 
 ### Added
@@ -102,6 +118,7 @@ First release.
 - Reasoning is off unless an agent opts in, because reasoning tokens are drawn
   from the same `max_tokens` budget as the answer.
 
+[1.1.2]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.1.2
 [1.1.1]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.1.1
 [1.1.0]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.1.0
 [1.0.2]: https://github.com/9t29zhmwdh-coder/HiveMind_Chat/releases/tag/v1.0.2

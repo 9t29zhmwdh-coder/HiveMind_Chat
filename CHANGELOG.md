@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 - `rustls` 0.23.43 to 0.23.45 for RUSTSEC-2026-0285: TLS 1.3 handshake messages were accepted across encryption level boundaries. The dependency audit failed on it, which also held back every Dependabot pull request.
+- `chacha20` 0.10.1 to 0.10.2: 0.10.1 was yanked, and the audit runs with `--deny warnings`, so it failed on that as well.
 
 ### Changed
 

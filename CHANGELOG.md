@@ -5,6 +5,19 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2026-09-27
+
+### Changed
+
+Dependency and CI updates merged since v1.1.3, each with green checks:
+
+- chore(deps): Bump softprops/action-gh-release from 3.0.2 to 3.0.3 (#23)
+- chore(deps): Bump github/codeql-action/upload-sarif (#24)
+- chore(deps): Bump the web-dependencies group across 1 directory with 6 updates (#27)
+- chore(deps): Bump the rust-dependencies group across 1 directory with 5 updates (#28)
+
+---
+
 ## [1.1.3] - 2026-09-27
 
 ### Security

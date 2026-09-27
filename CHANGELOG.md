@@ -5,6 +5,19 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2026-09-27
+
+### Changed
+
+Dependency and CI updates merged since v1.1.4, each with green checks:
+
+- chore(deps): Bump debian from `abd67ff` to `3783cc0` (#16)
+- chore(deps): Bump rust from `0e2bcae` to `93ce27a` (#17)
+- chore(deps): Bump node from `cd56571` to `662933c` (#19)
+- github/codeql-action `init` and `analyze` together to 4.38.2 (replaces #21 and #22, which each moved only one of the pair, so CodeQL failed on mismatched versions)
+
+---
+
 ## [1.1.4] - 2026-09-27
 
 ### Changed

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.6] - 2026-10-11
 
+### Security
+
+- Updated `source-map-js` to 1.2.2 in the frontend lockfile, which fixes GHSA-68fv-2mgg-jv7q reported by `npm audit` (build tooling only).
+
 ### Fixed
 
 - The OpenSSF Scorecard badge in the README showed a broken image on GitHub. The live badge is fetched through GitHub's image proxy, which gives up after four seconds, and the Scorecard lookup behind it often takes longer. The badge is now a small image stored in `docs/badges/` with the score of the last release, so it always loads.

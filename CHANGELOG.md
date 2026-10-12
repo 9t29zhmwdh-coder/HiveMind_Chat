@@ -5,6 +5,21 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.10] - 2026-10-12
+
+### Changed
+
+Dependency and CI updates merged since v1.1.9, each with green checks:
+
+- chore(deps): Bump actions/setup-node from 7.0.0 to 7.1.0 (#51)
+- chore(deps): Bump actions/download-artifact from 8.0.1 to 8.0.2 (#50)
+- chore(deps): Bump actions/upload-artifact from 7.0.1 to 7.0.2 (#48)
+- chore(deps): Bump rust from `93ce27a` to `114c7a4` (#46)
+- chore(deps): Bump node from `662933c` to `86f07bc` (#45)
+- chore(deps): bump github/codeql-action init, analyze and upload-sarif together to 4.38.3
+
+---
+
 ## [1.1.9] - 2026-10-12
 
 ### Changed

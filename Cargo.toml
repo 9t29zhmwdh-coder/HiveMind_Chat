@@ -3,7 +3,7 @@ resolver = "2"
 members = ["crates/hive-core", "crates/hive-server", "crates/hive-cli"]
 
 [workspace.package]
-version = "1.1.9"
+version = "1.1.10"
 edition = "2021"
 rust-version = "1.89"
 license = "MIT"

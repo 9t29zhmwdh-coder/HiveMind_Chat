@@ -5,6 +5,10 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    # uuid 1.27 and later need rustc 1.89, the project's minimum is 1.88.
+    ignore:
+      - dependency-name: "uuid"
+        versions: [">=1.27.0"]
     groups:
       rust-dependencies:
         patterns: ["*"]

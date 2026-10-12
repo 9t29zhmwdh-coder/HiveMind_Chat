@@ -5,6 +5,16 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.8] - 2026-10-12
+
+### Changed
+
+Dependency and CI updates merged since v1.1.7, each with green checks:
+
+- chore(ci): keep Dependabot from proposing uuid 1.27 or later (needs Rust 1.89)
+
+---
+
 ## [1.1.7] - 2026-10-12
 
 ### Changed

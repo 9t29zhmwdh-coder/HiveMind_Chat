@@ -5,6 +5,21 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.7] - 2026-10-12
+
+### Changed
+
+Dependency and CI updates merged since v1.1.6, each with green checks:
+
+- chore(deps): Bump docker/setup-buildx-action from 4.3.0 to 4.4.1 (#32)
+- chore(deps): Bump docker/build-push-action from 7.3.0 to 7.4.0 (#35)
+- chore(deps-dev): Bump the web-dependencies group across 1 directory with 2 updates (#38)
+- chore(deps): Bump dtolnay/rust-toolchain (#39)
+- chore(deps): Bump the rust-dependencies group across 1 directory with 3 updates (#42)
+- chore(deps): Bump debian from `3783cc0` to `7c7b2c9` (#36)
+
+---
+
 ## [1.1.6] - 2026-10-11
 
 ### Security
